@@ -29,6 +29,10 @@ class SQLBuilder:
         self.columns.append((column_path, alias))
         return self
     
+    def add_columns(self, column_path: List[str]) -> 'SQLBuilder':
+        [self.add_column(col) for col in column_path]
+        return self
+    
     def build(self) -> str:
         """
         Build the SQL query that converts sparse data to dense.
@@ -48,7 +52,7 @@ class SQLBuilder:
             column_def = (
                 f"    last_value(max(\"{col_path}\") IGNORE nulls) "
                 f"OVER (PARTITION BY filename ORDER BY loop_count "
-                f"ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS {alias}"
+                f"ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS '{alias}'"
             )
             column_definitions.append(column_def)
             

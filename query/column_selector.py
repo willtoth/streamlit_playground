@@ -1,7 +1,10 @@
 import streamlit as st
+from collections import defaultdict
 import duckdb
 from fuzzywuzzy import fuzz
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict
+from st_ant_tree import st_ant_tree
+
 
 class ColumnSelector:
     def __init__(self, conn: duckdb.DuckDBPyConnection):
@@ -40,7 +43,7 @@ class ColumnSelector:
             return []
             
     @staticmethod
-    def filter_columns(columns: List[str], search_term: str) -> List[Tuple[str, int]]:
+    def filter_columns(columns: List[str], search_term: str) -> List[str]:
         """
         Filter columns using fuzzy search.
         
@@ -49,80 +52,65 @@ class ColumnSelector:
             search_term: Search term to filter by
             
         Returns:
-            List of tuples containing (column_name, match_score)
+            List of matching column names
         """
         if not search_term:
-            return [(col, 100) for col in columns]
+            return columns
             
         results = []
         for col in columns:
             score = fuzz.ratio(search_term.lower(), col.lower())
             if score > 60:  # Only include matches with score > 60%
-                results.append((col, score))
+                results.append(col)
         
-        # Sort by score descending
-        return sorted(results, key=lambda x: x[1], reverse=True)
+        return results
 
+    def build_tree_data(self, paths: List[str]) -> List[Dict]:
+        """
+        Build a tree structure from column names.
         
-    def render(self):
+        Args:
+            columns: List of column names
+            
+        Returns:
+            Dictionary representing the tree structure
+        """
+        def insert_node(tree, parts, all_parts, full_path: str):
+            if not parts:
+                return
+            node = next((item for item in tree if item["title"] == parts[0]), None)
+            current_path = "/".join(all_parts[: len(all_parts) - len(parts) + 1])
+
+            if full_path.startswith("/"):
+                current_path = "/" + current_path
+            
+            if not node:
+                node = {"value": current_path, "title": parts[0]}
+                if len(parts) > 1:
+                    node["children"] = []
+                tree.append(node)
+            if len(parts) > 1:
+                insert_node(node.setdefault("children", []), parts[1:], all_parts, full_path)
+        
+        tree: List[Dict] = []
+        for path in paths:
+            parts = path.strip("/").split("/")
+            insert_node(tree, parts, parts, path)
+
+        return tree
+        
+    def get_selection(self, table_name):
         """Render the Streamlit interface."""
-        st.title("SQL Query Builder")
-                    
-        # Table selection
-        table_name = st.text_input("Table Name", "txwac")
+        st.title("Column Chooser")
         
         # Get available columns
         self.columns = self.get_available_columns(table_name)
         
-        # Search box
-        search_term = st.text_input("Search columns", "")
-        
-        # Filter columns based on search
-        filtered_columns = self.filter_columns(self.columns, search_term)
-        
-        # Display columns in a scrollable container
-        st.subheader("Available Columns")
-        
-        # Create a container for the columns
-        col_container = st.container()
-        
-        with col_container:
-            # Display columns in a grid
-            cols = st.columns(3)
-            for i, (col, score) in enumerate(filtered_columns):
-                col_idx = i % 3
-                with cols[col_idx]:
-                    if st.checkbox(f"{col} ({score}%)", key=f"col_{col}"):
-                        if col not in self.selected_columns:
-                            self.selected_columns.append(col)
-                        elif not st.session_state.get(f"col_{col}", False):
-                            self.selected_columns.remove(col)
-        
-        # Build query button
-        if st.button("Build Query"):
-            query = self.build_query(table_name)
-            if query:
-                # Display the query
-                st.subheader("Generated Query")
-                st.code(query, language="sql")
-                
-                # Add a copy button
-                if st.button("Copy Query"):
-                    st.write("Query copied to clipboard!")
-            else:
-                st.warning("Please select at least one column")
-
-def main():
-    # Example usage with connection management
-    db_path = st.sidebar.text_input("Database Path", ":memory:")
-    read_only = st.sidebar.checkbox("Read Only", value=True)
-    
-    try:
-        conn = duckdb.connect(db_path, read_only=read_only)
-        selector = ColumnSelector(conn)
-        selector.render()
-    except Exception as e:
-        st.error(f"Error connecting to database: {str(e)}")
-
-if __name__ == "__main__":
-    main() 
+        # Build and display the tree
+        tree_data = self.build_tree_data(self.columns)
+        return st_ant_tree(
+            treeData=tree_data,
+            showSearch=True,
+            placeholder="Search and select",
+            treeCheckable=True
+        )

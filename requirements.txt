@@ -1,4 +1,6 @@
-streamlit>=1.43.2
-duckdb>=1.2.1
+streamlit>=1.24.0
+duckdb>=0.8.1
 fuzzywuzzy>=0.18.0
-python-Levenshtein>=0.27.1  # Optional but recommended for better fuzzywuzzy performance 
+python-Levenshtein>=0.21.0  # Optional but recommended for better fuzzywuzzy performance
+st-ant-tree>=0.1.0
+types-fuzzywuzzy>=0.18.0 
