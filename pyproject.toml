@@ -1,0 +1,10 @@
+[project]
+name = "frc-bigdata"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mypy>=1.15.0",
+    "tool>=0.8.0",
+]
