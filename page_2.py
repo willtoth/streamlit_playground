@@ -8,7 +8,7 @@ from sql_formatter.core import format_sql
 st.markdown("# Query Builder")
 st.subheader("Build a Query")
 
-st.sidebar.markdown("# Page 2 ❄️")
+st.sidebar.markdown("# Page 2 🗞️")
 
 con = st.session_state['conn']
 selector = ColumnSelector(con)
