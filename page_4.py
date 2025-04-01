@@ -55,7 +55,7 @@ def upload_file(file: BytesIO):
 
 uploaded_file = st.file_uploader("Choose a file", type="wpilog", accept_multiple_files=True)
 
-if uploaded_file is not None:
+if uploaded_file is not None and len(uploaded_file) > 0:
     progress_bar = st.progress(0, text="Waiting for upload to server...")
     for file in uploaded_file:
         progress_text = f"Uploading {file.name} to S3"
