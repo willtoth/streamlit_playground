@@ -6,9 +6,11 @@ from sql_formatter.core import format_sql
 
 
 st.markdown("# Coral Placement 🗞️")
-st.markdown("This metric tracks the time from when the laterator is commmanded to be out, to when the reef sensor is triggered.")
 
-st.sidebar.markdown("# Coral Placement 🗞️")
+
+st.sidebar.markdown("""# Coral Placement 🗞️
+This metric tracks the time from when the laterator is commmanded to be out, to when the reef sensor is triggered.
+""")
 
 con = st.session_state['conn']
 

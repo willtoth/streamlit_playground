@@ -1,8 +1,10 @@
 import streamlit as st
 
 st.markdown("# Intake Metrics")
-st.sidebar.markdown("# Intake Metrics")
-
+st.sidebar.markdown("""# Intake Metrics
+This metric tracks the time from when the robot is 1.5 meters from a feeder station and
+                    the intake is running, to when the inner sensor is triggered.
+""")
 
 con = st.session_state['conn']
 
@@ -44,7 +46,7 @@ WITH data_table AS (
       LINE_TO_POINT(getvariable('Red2A'), getvariable('Red2B'), getvariable('Red2C'), PoseX, PoseY) As DistanceToRedRightFeeder,
       LEAST(DistanceToBlueLeftFeeder, DistanceToBlueRightFeeder, DistanceToRedLeftFeeder, DistanceToRedRightFeeder) AS MinDistanceToFeeder,
       MinDistanceToFeeder < 1.5 AND IntakeState = 'INTAKING' AS IsFeeding,
-      IntakeState LIKE '%INTAK%' AS IsIntaking,
+      IntakeState LIKE '%INTAK%' OR IntakeState LIKE '%UNJAM%' AS IsIntaking,
       IntakeState = 'STOPPED' AND InnerSensorTriggered AS IntakeStoppedWithCoral,
       FROM (
         SELECT loop_count, filename,
