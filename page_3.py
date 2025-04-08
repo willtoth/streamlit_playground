@@ -96,7 +96,7 @@ event_alignment AS (
   SELECT LOWER(EventName) AS EventName, UPPER(CONCAT(MATCH_TYPE_STRING(MatchType), CAST(MatchNumber AS INTEGER))) AS Match, RIGHT(CAST(to_seconds(CAST(MatchTime AS INTEGER)) AS VARCHAR),5) AS MatchTime,
     first_reef_sensor_timestamp - first_feed_rising_edge AS IntakeTime
     FROM event_alignment
-    WHERE IntakeTime IS NOT NULL AND IntakeTime < 50
+    WHERE IntakeTime IS NOT NULL AND IntakeTime < 50 AND EventName IS NOT NULL
     ORDER BY filename, intake_number;
   """).fetchdf()
 

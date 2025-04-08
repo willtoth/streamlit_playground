@@ -75,9 +75,13 @@ page_2 = st.Page("page_2.py", title="Coral Placement Timing", icon="📏")
 page_3 = st.Page("page_3.py", title="Intake Metrics", icon="🐋")
 page_4 = st.Page("page_4.py", title="WPILog Uploader", icon="⏫")
 query_builder = st.Page("query_builder.py", title="Query Builder", icon="🚧")
+robot_actions = st.Page("robot_actions.py", title="Robot Actions", icon="🤖")
+match_breakdown = st.Page("match_breakdown.py", title="Match Breakdown", icon="⌛")
+
+st.session_state['match_breakdown_page'] = match_breakdown
 
 # Set up navigation
-pg = st.navigation([main_page, page_2, page_3, page_4])
+pg = st.navigation([main_page, page_2, page_3, page_4, robot_actions, query_builder, match_breakdown])
 
 # Connect to DB
 @st.cache_resource
