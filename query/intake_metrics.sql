@@ -1,19 +1,19 @@
 -- Drive Station Lines (Standard Form) Ax + By + C = 0
-SET VARIABLE Blue1A = -0.59;
-SET VARIABLE Blue1B = -0.84;
-SET VARIABLE Blue1C = 1.01;
+SET VARIABLE Blue1A = -1.22;
+SET VARIABLE Blue1B = -1.723;
+SET VARIABLE Blue1C = 2.086;
 
-SET VARIABLE Blue2A = 0.63;
-SET VARIABLE Blue2B = -0.84;
-SET VARIABLE Blue2C = 5.72;
+SET VARIABLE Blue2A = 1.25;
+SET VARIABLE Blue2B = -1.723;
+SET VARIABLE Blue2C = 11.751;
 
-SET VARIABLE Red1A = 0.63;
-SET VARIABLE Red1B = 0.84;
-SET VARIABLE Red1C = -16.71;
+SET VARIABLE Red1A = 1.215;
+SET VARIABLE Red1B = -1.718;
+SET VARIABLE Red1C = -19.258;
 
-SET VARIABLE Red2A = -0.59;
-SET VARIABLE Red2B = 0.84;
-SET VARIABLE Red2C = 9.35;
+SET VARIABLE Red2A = -1.258;
+SET VARIABLE Red2B = -1.7;
+SET VARIABLE Red2C = 33.659;
 
 WITH data_table AS (
   SELECT *,
@@ -24,9 +24,6 @@ WITH data_table AS (
   FROM (
     SELECT *,
       ABS(OmegaVelocity) + ABS(XVelocity) + ABS(YVelocity) < 0.01 AS RobotStopped,
-      CASE WHEN PoseX1 IS NULL THEN PoseX2 ELSE PoseX1 END AS PoseX,
-      CASE WHEN PoseY1 IS NULL THEN PoseX2 ELSE PoseY1 END AS PoseY,
-      CASE WHEN PoseTheta1 IS NULL THEN PoseTheta2 ELSE PoseTheta1 END AS PoseTheta,
       LINE_TO_POINT(getvariable('Blue1A'), getvariable('Blue1B'), getvariable('Blue1C'), PoseX, PoseY) As DistanceToBlueLeftFeeder,
       LINE_TO_POINT(getvariable('Blue2A'), getvariable('Blue2B'), getvariable('Blue2C'), PoseX, PoseY) As DistanceToBlueRightFeeder,
       LINE_TO_POINT(getvariable('Red1A'), getvariable('Red1B'), getvariable('Red1C'), PoseX, PoseY) As DistanceToRedLeftFeeder,
@@ -38,12 +35,9 @@ WITH data_table AS (
       FROM (
         SELECT loop_count, filename,
                MIN(timestamp) as timestamp,
-               last_value(Max("/RealOutputs/RobotState/OdometryPose").x IGNORE nulls) OVER (PARTITION BY filename ORDER BY loop_count ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS PoseX1,
-               last_value(Max("/RealOutputs/RobotState/OdometryPose").y IGNORE nulls) OVER (PARTITION BY filename ORDER BY loop_count ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS PoseY1,
-               last_value(Max("/RealOutputs/RobotState/OdometryPose").value IGNORE nulls) OVER (PARTITION BY filename ORDER BY loop_count ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS PoseTheta1,
-               last_value(Max("/RealOutputs/Odometry/Robot").x IGNORE nulls) OVER (PARTITION BY filename ORDER BY loop_count ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS PoseX2,
-               last_value(Max("/RealOutputs/Odometry/Robot").y IGNORE nulls) OVER (PARTITION BY filename ORDER BY loop_count ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS PoseY2,
-               last_value(Max("/RealOutputs/Odometry/Robot").value IGNORE nulls) OVER (PARTITION BY filename ORDER BY loop_count ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS PoseTheta2,
+               last_value(Max("/RealOutputs/Odometry/Robot").x IGNORE nulls) OVER (PARTITION BY filename ORDER BY loop_count ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS PoseX,
+               last_value(Max("/RealOutputs/Odometry/Robot").y IGNORE nulls) OVER (PARTITION BY filename ORDER BY loop_count ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS PoseY,
+               last_value(Max("/RealOutputs/Odometry/Robot").value IGNORE nulls) OVER (PARTITION BY filename ORDER BY loop_count ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS PoseTheta,
                last_value(Max("/RealOutputs/SwerveChassisSpeeds/Measured").vx IGNORE nulls) OVER (PARTITION BY filename ORDER BY loop_count ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS XVelocity,
                last_value(Max("/RealOutputs/SwerveChassisSpeeds/Measured").vy IGNORE nulls) OVER (PARTITION BY filename ORDER BY loop_count ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS YVelocity,
                last_value(Max("/RealOutputs/SwerveChassisSpeeds/Measured").omega IGNORE nulls) OVER (PARTITION BY filename ORDER BY loop_count ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS OmegaVelocity,
